@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const connectDB = require('./config/db.js')
 require('dotenv').config()
+const connectCloudinary = require('./middleware/cloudinary.js')
 // app config
 const app = express()
 const port = 4000
@@ -12,6 +13,7 @@ app.use(cors())
 
 // db connection
 connectDB()
+connectCloudinary();
  
 // api endpoints
 app.use("/images", express.static("uploads"));

@@ -1,23 +1,31 @@
 const foodModel = require('../models/foodModedl')
-const fs = require('fs')
+const cloudinary = require("cloudinary");
 
 // add food item
 
 const addFood = async (req, res) => {
-    let image_filename = `${req.file.filename}`
-    const food = new foodModel({
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price,
-        category: req.body.category,
-        image:image_filename
-    })
+    
     try {
+        let imagesUrl = await Promise.all(req.files.image.map(async (item) => {
+            let result = await cloudinary.uploader.upload(item.path, {
+              resource_type: "image",
+            });
+            return result.secure_url;
+          })
+        );
+        console.log(imagesUrl.join(''));
+        const food = new foodModel({
+          name: req.body.name,
+          description: req.body.description,
+          price: req.body.price,
+          category: req.body.category,
+          image: imagesUrl.join(''),
+        });
         await food.save()
         res.json({success:true,message:"Food Added"})
     } catch (err) {
-        console.log(err.message)
-        res.json({success:false,message:"Error"})
+        console.log(err)
+        res.json({success:false,message:err.message})
     }
 }
 
